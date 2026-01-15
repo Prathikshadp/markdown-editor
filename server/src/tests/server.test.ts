@@ -16,37 +16,37 @@ import prisma from '../db/prisma';
 
 describe('POST /documents', () => {
   it('should create a new document', async () => {
-    const mockHtml = '<h1>Hello World</h1>';
+    const mockMarkdown = '# Hello World';
     const mockName = 'Test Document';
-    const mockDoc = { id: 1, name: mockName, htmlContent: mockHtml, createdAt: new Date() };
+    const mockDoc = { id: 1, name: mockName, markdownContent: mockMarkdown, createdAt: new Date() };
     
     (prisma.document.create as jest.Mock).mockResolvedValue(mockDoc);
 
     const response = await request(app)
       .post('/documents')
-      .send({ name: mockName, html: mockHtml });
+      .send({ name: mockName, markdown: mockMarkdown });
 
     expect(response.status).toBe(201);
     expect(response.body.document).toEqual(expect.objectContaining({
       id: 1,
       name: mockName,
-      htmlContent: mockHtml
+      markdownContent: mockMarkdown
     }));
   });
 
-  it('should return 400 if html is missing', async () => {
+  it('should return 400 if markdown is missing', async () => {
     const response = await request(app)
       .post('/documents')
       .send({});
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe('Name and html are required');
+    expect(response.body.error).toBe('Name and markdown are required');
   });
 });
 
 describe('GET /documents', () => {
   it('should return the last 10 documents', async () => {
-    const mockDocs = Array.from({ length: 15 }, (_, i) => ({ id: i + 1, htmlContent: `<p>${i}</p>`, createdAt: new Date() }));
+    const mockDocs = Array.from({ length: 15 }, (_, i) => ({ id: i + 1, markdownContent: `<p>${i}</p>`, createdAt: new Date() }));
     (prisma.document.findMany as jest.Mock).mockResolvedValue(mockDocs.slice(0, 10));
 
     const response = await request(app).get('/documents');
@@ -58,7 +58,7 @@ describe('GET /documents', () => {
 
 describe('GET /documents/all', () => {
   it('should return all documents', async () => {
-    const mockDocs = Array.from({ length: 15 }, (_, i) => ({ id: i + 1, htmlContent: `<p>${i}</p>`, createdAt: new Date() }));
+    const mockDocs = Array.from({ length: 15 }, (_, i) => ({ id: i + 1, markdownContent: `<p>${i}</p>`, createdAt: new Date() }));
     (prisma.document.findMany as jest.Mock).mockResolvedValue(mockDocs);
 
     const response = await request(app).get('/documents/all');

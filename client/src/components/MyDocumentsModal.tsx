@@ -5,7 +5,7 @@ import { Document } from '../api'; // Import the Document interface from the api
 interface MyDocumentsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoadContent: (content: string) => void;
+  onLoadContent: (doc: Document) => void;
 }
 
 const MyDocumentsModal: React.FC<MyDocumentsModalProps> = ({ isOpen, onClose, onLoadContent }) => {
@@ -20,7 +20,7 @@ const MyDocumentsModal: React.FC<MyDocumentsModalProps> = ({ isOpen, onClose, on
 
   const handleLoadContent = async (id: number) => {
     const document = await getDocument(id.toString());
-    onLoadContent(document.htmlContent); // Use htmlContent from the fetched document
+    onLoadContent(document);
     onClose();
   };
 

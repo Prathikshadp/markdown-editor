@@ -1,33 +1,52 @@
-import { useState, useRef } from 'react';
-import { MarkdownEditor, MarkdownEditorRef } from './components/MarkdownEditor';
-import { saveDocument } from './api';
+import { useState } from 'react';
+import { MarkdownEditor } from './components/MarkdownEditor';
+import { Document, saveDocument, updateDocument } from './api';
 import MyDocumentsModal from './components/MyDocumentsModal';
 import SaveDocumentModal from './components/SaveDocumentModal';
+import { Toaster, toast } from 'react-hot-toast';
 
 function App() {
   const [isMyDocumentsModalOpen, setIsMyDocumentsModalOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [markdown, setMarkdown] = useState('');
-  const editorRef = useRef<MarkdownEditorRef>(null);
+  const [markdown, setMarkdown] = useState('# Hello World\n\nStart typing markdown...');
+  const [currentDoc, setCurrentDoc] = useState<Document | null>(null);
 
-  const handleSave = async (title: string) => {
-    if (editorRef.current) {
-      const htmlContent = await editorRef.current.getHtml();
-      await saveDocument(title, htmlContent);
-      alert('Document saved successfully!');
+  const handleSave = async () => {
+    if (currentDoc) {
+      try {
+        await updateDocument(currentDoc.id, markdown);
+        toast.success('Document updated successfully!');
+      } catch (error) {
+        toast.error('Failed to update document.');
+      }
+    } else {
+      setIsSaveModalOpen(true);
+    }
+  };
+
+  const handleSaveNew = async (title: string) => {
+    try {
+      const newDoc = await saveDocument(title, markdown);
+      setCurrentDoc(newDoc.document);
+      toast.success('Document saved successfully!');
+    } catch (error) {
+      toast.error('Failed to save document.');
     }
   };
 
   const handleClear = () => {
     setMarkdown('');
+    setCurrentDoc(null);
   };
 
-  const handleLoadContent = (content: string) => {
-    setMarkdown(content);
+  const handleLoadContent = (doc: Document) => {
+    setMarkdown(doc.markdownContent);
+    setCurrentDoc(doc);
   };
 
   return (
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-white">
+      <Toaster />
       <div className="flex justify-between items-center p-4 bg-gray-100 border-b">
         <h1 className="text-2xl font-bold">Markdown Editor</h1>
         <div>
@@ -38,7 +57,7 @@ function App() {
             Clear
           </button>
           <button
-            onClick={() => setIsSaveModalOpen(true)}
+            onClick={handleSave}
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
           >
             Save Document
@@ -51,7 +70,7 @@ function App() {
           </button>
         </div>
       </div>
-      <MarkdownEditor ref={editorRef} initialMarkdown={markdown} />
+      <MarkdownEditor markdown={markdown} onMarkdownChange={setMarkdown} />
       <MyDocumentsModal
         isOpen={isMyDocumentsModalOpen}
         onClose={() => setIsMyDocumentsModalOpen(false)}
@@ -60,7 +79,7 @@ function App() {
       <SaveDocumentModal
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
-        onSave={handleSave}
+        onSave={handleSaveNew}
       />
     </div>
   );

@@ -1,23 +1,14 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
-export interface MarkdownEditorRef {
-  getHtml: () => Promise<string>;
-}
-
 interface MarkdownEditorProps {
-    initialMarkdown?: string;
-    onSave: (html: string) => Promise<void>;
+    markdown: string;
+    onMarkdownChange: (markdown: string) => void;
 }
 
-export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(({ initialMarkdown, onSave }, ref) => {
-    const [markdown, setMarkdown] = useState<string>(initialMarkdown || '# Hello World\n\nStart typing markdown...');
+export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ markdown, onMarkdownChange }) => {
     const [html, setHtml] = useState<string>('');
-
-    useEffect(() => {
-        setMarkdown(initialMarkdown || '');
-    }, [initialMarkdown]);
 
     useEffect(() => {
         const convert = async () => {
@@ -28,24 +19,8 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
         convert();
     }, [markdown]);
 
-    useImperativeHandle(ref, () => ({
-        getHtml: async () => {
-            return html;
-        }
-    }));
-
     return (
         <div className="flex flex-col h-full">
-            {/* Toolbar */}
-            <div className="flex items-center justify-end px-4 py-2 bg-gray-50 border-b">
-                <button
-                    onClick={() => onSave(html)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                >
-                    Save Document
-                </button>
-            </div>
-
             {/* Editor Area */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Markdown Input */}
@@ -56,7 +31,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
                     <textarea
                         className="flex-1 p-6 resize-none font-mono text-sm focus:outline-none"
                         value={markdown}
-                        onChange={(e) => setMarkdown(e.target.value)}
+                        onChange={(e) => onMarkdownChange(e.target.value)}
                         placeholder="Type your markdown here..."
                         spellCheck={false}
                     />
@@ -75,4 +50,4 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
             </div>
         </div>
     );
-});
+};

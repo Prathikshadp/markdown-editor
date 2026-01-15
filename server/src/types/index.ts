@@ -1,13 +1,13 @@
 export interface Document {
   id: number;
   name: string;
-  htmlContent: string;
+  markdownContent: string;
   createdAt: Date;
 }
 
 export interface CreateDocumentRequest {
   name: string;
-  html: string;
+  markdown: string;
 }
 
 export interface CreateDocumentResponse {
