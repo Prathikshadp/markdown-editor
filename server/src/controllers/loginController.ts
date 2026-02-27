@@ -23,7 +23,8 @@ export const login = async (req: Request<{}, {}, { username: string; password: s
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
-    res.status(200).json({ message: 'Login successful' });
+    // Redirect to dashboard after successful login
+    return res.redirect('/dashboard');
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ error: 'Internal server error' });
