@@ -23,8 +23,8 @@ export const login = async (req: Request<{}, {}, { username: string; password: s
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
-    // Return a JSON response instead of a redirect
-    return res.json({ message: 'Login successful', redirect: '/dashboard' });
+    // Return a redirect response instead of a JSON response
+    return res.redirect(302, '/dashboard');
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ error: 'Internal server error' });
